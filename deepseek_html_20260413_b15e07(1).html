@@ -1,0 +1,570 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=yes">
+  <title>Witches' Tarot Guidebook · Major & Minor Arcana Grimoire</title>
+  <style>
+    * {
+      margin: 0;
+      padding: 0;
+      box-sizing: border-box;
+    }
+
+    body {
+      background: #1e1a1a;
+      background-image: radial-gradient(circle at 10% 20%, rgba(45, 35, 35, 0.6) 0%, #0f0c0c 100%);
+      font-family: 'Segoe UI', 'Cormorant Garamond', 'Georgia', 'Times New Roman', serif;
+      color: #f3e9d2;
+      min-height: 100vh;
+      padding: 1.5rem;
+    }
+
+    .app {
+      max-width: 1600px;
+      margin: 0 auto;
+      background: rgba(20, 15, 18, 0.85);
+      backdrop-filter: blur(2px);
+      border-radius: 2.5rem;
+      box-shadow: 0 20px 40px rgba(0, 0, 0, 0.5), inset 0 1px 0 rgba(255, 255, 255, 0.05);
+      overflow: hidden;
+      border: 1px solid #5e4b3c;
+    }
+
+    .dashboard {
+      display: flex;
+      flex-wrap: wrap;
+    }
+
+    /* LEFT SIDEBAR */
+    .sidebar {
+      flex: 1.2;
+      min-width: 300px;
+      background: #1f1917e6;
+      backdrop-filter: blur(4px);
+      border-right: 1px solid #4a3729;
+      padding: 1.8rem 1.2rem;
+      max-height: 85vh;
+      overflow-y: auto;
+      scrollbar-width: thin;
+    }
+
+    .sidebar::-webkit-scrollbar {
+      width: 6px;
+    }
+    .sidebar::-webkit-scrollbar-track {
+      background: #2f241f;
+      border-radius: 8px;
+    }
+    .sidebar::-webkit-scrollbar-thumb {
+      background: #b87c4f;
+      border-radius: 8px;
+    }
+
+    .section-title {
+      font-size: 1.8rem;
+      letter-spacing: 2px;
+      font-weight: 500;
+      border-left: 5px solid #e4b363;
+      padding-left: 1rem;
+      margin: 1.5rem 0 1rem 0;
+      font-family: 'Georgia', serif;
+      text-shadow: 0 2px 3px black;
+    }
+    .section-title:first-of-type {
+      margin-top: 0;
+    }
+
+    .text-buttons {
+      display: flex;
+      flex-direction: column;
+      gap: 0.7rem;
+      margin-bottom: 1rem;
+    }
+
+    .text-guide-btn {
+      background: #2c2220;
+      border: 1px solid #6a4c38;
+      color: #ffefcf;
+      text-align: left;
+      padding: 0.75rem 1.2rem;
+      font-size: 1.05rem;
+      font-weight: 500;
+      border-radius: 60px;
+      cursor: pointer;
+      transition: all 0.2s ease;
+      font-family: inherit;
+      letter-spacing: 0.3px;
+    }
+
+    .text-guide-btn:hover {
+      background: #8b5a3e;
+      border-color: #dba562;
+      color: white;
+      transform: translateX(6px);
+      box-shadow: 0 5px 12px rgba(0,0,0,0.3);
+    }
+
+    .text-guide-btn.active {
+      background: #b46f42;
+      border-color: #f7cf94;
+      color: #fff6e6;
+      box-shadow: 0 0 8px rgba(210, 140, 70, 0.6);
+    }
+
+    /* Major Arcana Grid (image buttons) */
+    .cards-grid {
+      display: grid;
+      grid-template-columns: repeat(auto-fill, minmax(85px, 1fr));
+      gap: 1rem;
+      margin-top: 0.5rem;
+      margin-bottom: 1.5rem;
+    }
+
+    .card-btn {
+      background: #2b201c;
+      border: 2px solid #644a38;
+      border-radius: 20px;
+      padding: 0.5rem;
+      cursor: pointer;
+      transition: all 0.2s;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+    }
+
+    .card-btn:hover {
+      transform: translateY(-5px);
+      border-color: #e7b46b;
+      background: #3f2e26;
+    }
+
+    .card-btn.active-card {
+      border: 3px solid #f5bc70;
+      background: #4d3528;
+      box-shadow: 0 0 0 2px #a76434;
+    }
+
+    .card-thumb {
+      width: 100%;
+      aspect-ratio: 2 / 3;
+      object-fit: cover;
+      border-radius: 12px;
+      background: #3f2c22;
+      display: block;
+      box-shadow: 0 4px 8px rgba(0,0,0,0.3);
+    }
+
+    .card-label {
+      margin-top: 6px;
+      font-size: 0.7rem;
+      font-weight: 500;
+      text-align: center;
+      color: #efdbb8;
+    }
+
+    /* Expandable Minor Arcana Sections */
+    .minor-suit {
+      margin-top: 1rem;
+      border: 1px solid #5e3f2e;
+      border-radius: 20px;
+      background: #241d1a70;
+      overflow: hidden;
+      margin-bottom: 0.8rem;
+    }
+    .suit-header {
+      background: #392b24;
+      padding: 0.7rem 1rem;
+      font-weight: bold;
+      font-size: 1.2rem;
+      color: #fad48b;
+      cursor: pointer;
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      border-radius: 20px 20px 0 0;
+      transition: background 0.2s;
+    }
+    .suit-header:hover {
+      background: #5a4034;
+    }
+    .suit-header .toggle-icon {
+      font-size: 1.3rem;
+    }
+    .suit-cards {
+      display: none;
+      grid-template-columns: repeat(auto-fill, minmax(80px, 1fr));
+      gap: 0.7rem;
+      padding: 1rem;
+      background: #1f1714c9;
+      max-height: 380px;
+      overflow-y: auto;
+    }
+    .suit-cards.open {
+      display: grid;
+    }
+    .minor-card-btn {
+      background: #2f231e;
+      border: 1px solid #73563f;
+      border-radius: 16px;
+      padding: 0.4rem;
+      cursor: pointer;
+      text-align: center;
+      transition: all 0.1s;
+    }
+    .minor-card-btn:hover {
+      background: #8a5a3e;
+      transform: scale(0.98);
+    }
+    .minor-card-btn.active-minor {
+      border: 2px solid #f5bc70;
+      background: #6d4732;
+    }
+    .minor-card-name {
+      font-size: 0.75rem;
+      font-weight: 500;
+      color: #ffefcf;
+      padding: 4px 0;
+    }
+
+    /* RIGHT PANEL: dual image viewer */
+    .viewer {
+      flex: 2.5;
+      min-width: 320px;
+      background: #130e0cd9;
+      display: flex;
+      flex-direction: column;
+      padding: 2rem 1.8rem;
+      align-items: center;
+      justify-content: center;
+    }
+
+    .viewer-header {
+      font-size: 1.3rem;
+      margin-bottom: 1rem;
+      border-bottom: 1px dashed #c49363;
+      padding-bottom: 0.4rem;
+      font-style: italic;
+    }
+
+    .dual-image-container {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 1.8rem;
+      justify-content: center;
+      align-items: flex-start;
+    }
+    .image-card {
+      background: #01010155;
+      border-radius: 24px;
+      padding: 0.8rem;
+      text-align: center;
+      max-width: 380px;
+      flex: 1;
+      border: 1px solid #7c5d48;
+    }
+    .image-card img {
+      max-width: 100%;
+      max-height: 55vh;
+      object-fit: contain;
+      border-radius: 16px;
+      box-shadow: 0 8px 18px black;
+    }
+    .image-caption {
+      margin-top: 0.5rem;
+      font-size: 0.75rem;
+      color: #e1c394;
+    }
+    .fallback-message {
+      background: #2b211d;
+      padding: 2rem;
+      border-radius: 2rem;
+      text-align: center;
+      color: #cfb07c;
+      font-size: 1.2rem;
+    }
+    .footer-note {
+      margin-top: 1.2rem;
+      font-size: 0.75rem;
+      opacity: 0.7;
+      text-align: center;
+    }
+
+    @media (max-width: 760px) {
+      body { padding: 0.8rem; }
+      .sidebar { max-height: 50vh; }
+      .dashboard { flex-direction: column; }
+      .dual-image-container { flex-direction: column; align-items: center; }
+    }
+  </style>
+</head>
+<body>
+<div class="app">
+  <div class="dashboard">
+    <div class="sidebar">
+      <!-- TEXT GUIDES section -->
+      <div class="section-title">📖 Text Guides</div>
+      <div style="margin-bottom: 0.5rem; font-size: 1.2rem; font-weight: bold; color:#e7bf8e;">✨ Introduction</div>
+      <div class="text-buttons" id="intro-buttons"></div>
+      
+      <div style="margin-bottom: 0.5rem; margin-top: 1.5rem; font-size: 1.2rem; font-weight: bold; color:#e7bf8e;">🔮 Tarot Readings</div>
+      <div class="text-buttons" id="reading-buttons"></div>
+
+      <!-- CARDS section: Major Arcana grid + Minor Arcana expandable suits -->
+      <div class="section-title" style="margin-top: 1.8rem;">🃏 Major Arcana</div>
+      <div class="cards-grid" id="major-grid-container"></div>
+      
+      <div class="section-title" style="margin-top: 0.5rem;">✨ Minor Arcana</div>
+      <div id="minor-arcana-accordion"></div>
+      <div class="footer-note">⚡ click any card/guide — all Major cards & Guides display two images (thumbnail + description).</div>
+    </div>
+
+    <!-- RIGHT PANEL: dynamic dual image viewer -->
+    <div class="viewer">
+      <div class="viewer-header">🌙  Sacred Pages  🌙</div>
+      <div id="viewerContent" class="dual-image-container">
+        <div class="fallback-message">✨ select a guide or tarot card<br>to reveal the corresponding pages</div>
+      </div>
+    </div>
+  </div>
+</div>
+
+<script>
+  // ---------- IMAGE BASE PATH (change if needed) ----------
+  const IMG_BASE = "";
+
+  // ---------- TEXT GUIDES (some have dual images) ----------
+  const introItems = [
+    { display: "Welcome to the Coven", mainImg: "welcome_coven.jpg", secondImg: "welcome_coven_detail.jpg", dual: true },
+    { display: "Tarot Basics", mainImg: "tarot_basics.jpg", secondImg: null, dual: false },
+    { display: "Understanding Court Cards", mainImg: "court_cards.jpg", secondImg: null, dual: false },
+    { display: "Reading Reversals... or Not", mainImg: "reading_reversals.jpg", secondImg: null, dual: false }
+  ];
+  
+  const readingItems = [
+    { display: "Opening and Closing a Reading", mainImg: "opening_closing_reading.jpg", secondImg: "opening_closing_part2.jpg", dual: true },
+    { display: "What to Ask", mainImg: "what_to_ask.jpg", secondImg: null, dual: false },
+    { display: "Getting Started with Tarot Spreads", mainImg: "tarot_spreads_start.jpg", secondImg: null, dual: false },
+    { display: "Which-Witch Tarot Spread", mainImg: "which_witch_spread.jpg", secondImg: "which_witch_spread_page2.jpg", dual: true },
+    { display: "Lilia's Safe-Passage Tarot Spread", mainImg: "lilia_safe_passage.jpg", secondImg: null, dual: false },
+    { display: "About the Author", mainImg: "about_author.jpg", secondImg: null, dual: false },
+    { display: "About the Illustrator", mainImg: "about_illustrator.jpg", secondImg: null, dual: false }
+  ];
+  
+  // ---------- MAJOR ARCANA (22 cards) + two special guide cards: "Major Arcana Guide" and "Minor Arcana Guide" ----------
+  // For ALL items in this array (both guides and actual arcana cards):
+  // When clicked, they display TWO images: the thumbnail page and the description page.
+  // The 'isGuide' property has been removed — all behave identically.
+  const majorArcanaCards = [
+    // Special Guides (they also show two images: thumbnail page + description page)
+    { name: "📘 Major Arcana Guide", thumb: "major_guide_thumb.jpg", image1: "major_guide_thumb.jpg", image2: "major_guide_desc.jpg" },
+    { name: "📙 Minor Arcana Guide", thumb: "minor_guide_thumb.jpg", image1: "minor_guide_thumb.jpg", image2: "minor_guide_desc.jpg" },
+    // Actual Major Arcana (22 cards) - each has thumb (card art) and desc (explanation page)
+    { name: "0 · The Fool", thumb: "thumb_fool.jpg", image1: "thumb_fool.jpg", image2: "desc_fool.jpg" },
+    { name: "I · The Magician", thumb: "thumb_magician.jpg", image1: "thumb_magician.jpg", image2: "desc_magician.jpg" },
+    { name: "II · The High Priestess", thumb: "thumb_high_priestess.jpg", image1: "thumb_high_priestess.jpg", image2: "desc_high_priestess.jpg" },
+    { name: "III · The Empress", thumb: "thumb_empress.jpg", image1: "thumb_empress.jpg", image2: "desc_empress.jpg" },
+    { name: "IV · The Emperor", thumb: "thumb_emperor.jpg", image1: "thumb_emperor.jpg", image2: "desc_emperor.jpg" },
+    { name: "V · The Hierophant", thumb: "thumb_hierophant.jpg", image1: "thumb_hierophant.jpg", image2: "desc_hierophant.jpg" },
+    { name: "VI · The Lovers", thumb: "thumb_lovers.jpg", image1: "thumb_lovers.jpg", image2: "desc_lovers.jpg" },
+    { name: "VII · The Chariot", thumb: "thumb_chariot.jpg", image1: "thumb_chariot.jpg", image2: "desc_chariot.jpg" },
+    { name: "VIII · Strength", thumb: "thumb_strength.jpg", image1: "thumb_strength.jpg", image2: "desc_strength.jpg" },
+    { name: "IX · The Hermit", thumb: "thumb_hermit.jpg", image1: "thumb_hermit.jpg", image2: "desc_hermit.jpg" },
+    { name: "X · Wheel of Fortune", thumb: "thumb_wheel_fortune.jpg", image1: "thumb_wheel_fortune.jpg", image2: "desc_wheel_fortune.jpg" },
+    { name: "XI · Justice", thumb: "thumb_justice.jpg", image1: "thumb_justice.jpg", image2: "desc_justice.jpg" },
+    { name: "XII · The Hanged Man", thumb: "thumb_hanged_man.jpg", image1: "thumb_hanged_man.jpg", image2: "desc_hanged_man.jpg" },
+    { name: "XIII · Death", thumb: "thumb_death.jpg", image1: "thumb_death.jpg", image2: "desc_death.jpg" },
+    { name: "XIV · Temperance", thumb: "thumb_temperance.jpg", image1: "thumb_temperance.jpg", image2: "desc_temperance.jpg" },
+    { name: "XV · The Devil", thumb: "thumb_devil.jpg", image1: "thumb_devil.jpg", image2: "desc_devil.jpg" },
+    { name: "XVI · The Tower", thumb: "thumb_tower.jpg", image1: "thumb_tower.jpg", image2: "desc_tower.jpg" },
+    { name: "XVII · The Star", thumb: "thumb_star.jpg", image1: "thumb_star.jpg", image2: "desc_star.jpg" },
+    { name: "XVIII · The Moon", thumb: "thumb_moon.jpg", image1: "thumb_moon.jpg", image2: "desc_moon.jpg" },
+    { name: "XIX · The Sun", thumb: "thumb_sun.jpg", image1: "thumb_sun.jpg", image2: "desc_sun.jpg" },
+    { name: "XX · Judgement", thumb: "thumb_judgement.jpg", image1: "thumb_judgement.jpg", image2: "desc_judgement.jpg" },
+    { name: "XXI · The World", thumb: "thumb_world.jpg", image1: "thumb_world.jpg", image2: "desc_world.jpg" }
+  ];
+  
+  // ---------- MINOR ARCANA DATA (text buttons, each minor card has a single description image) ----------
+  const minorSuits = [
+    { suit: "Wands", icon: "🔥", cards: generateSuitCards("Wands") },
+    { suit: "Cups", icon: "💧", cards: generateSuitCards("Cups") },
+    { suit: "Swords", icon: "⚔️", cards: generateSuitCards("Swords") },
+    { suit: "Pentacles", icon: "🪙", cards: generateSuitCards("Pentacles") }
+  ];
+  
+  function generateSuitCards(suit) {
+    const ranks = ["Ace", "Two", "Three", "Four", "Five", "Six", "Seven", "Eight", "Nine", "Ten", "Page", "Knight", "Queen", "King"];
+    return ranks.map(rank => ({
+      name: `${rank} of ${suit}`,
+      descImg: `desc_${rank.toLowerCase()}_${suit.toLowerCase()}.jpg`
+    }));
+  }
+  
+  // ----- Helper: display two images in the viewer -----
+  function displayTwoImages(imgSrc1, imgSrc2, caption1, caption2) {
+    const viewerDiv = document.getElementById("viewerContent");
+    viewerDiv.innerHTML = `
+      <div class="dual-image-container">
+        <div class="image-card">
+          <img src="${IMG_BASE}${imgSrc1}" alt="image 1" onerror="this.parentElement.innerHTML='<div class=\\'fallback-message\\' style=\\'padding:1rem\\'>⚠️ missing: ${imgSrc1}</div>'">
+          <div class="image-caption">${caption1}</div>
+        </div>
+        <div class="image-card">
+          <img src="${IMG_BASE}${imgSrc2}" alt="image 2" onerror="this.parentElement.innerHTML='<div class=\\'fallback-message\\' style=\\'padding:1rem\\'>⚠️ missing: ${imgSrc2}</div>'">
+          <div class="image-caption">${caption2}</div>
+        </div>
+      </div>
+    `;
+  }
+  
+  function displaySingle(imageSrc, caption = "Grimoire Page") {
+    const viewerDiv = document.getElementById("viewerContent");
+    viewerDiv.innerHTML = `
+      <div class="dual-image-container">
+        <div class="image-card">
+          <img src="${IMG_BASE}${imageSrc}" alt="page" onerror="this.parentElement.innerHTML='<div class=\\'fallback-message\\'>⚠️ image not found: ${imageSrc}</div>'">
+          <div class="image-caption">${caption}</div>
+        </div>
+      </div>
+    `;
+  }
+  
+  // Clear active states
+  function clearAllActive() {
+    document.querySelectorAll('.text-guide-btn').forEach(btn => btn.classList.remove('active'));
+    document.querySelectorAll('.card-btn').forEach(btn => btn.classList.remove('active-card'));
+    document.querySelectorAll('.minor-card-btn').forEach(btn => btn.classList.remove('active-minor'));
+  }
+  
+  // ---- Build Text Guides ----
+  function buildTextButtons() {
+    const introContainer = document.getElementById("intro-buttons");
+    const readingContainer = document.getElementById("reading-buttons");
+    introContainer.innerHTML = "";
+    readingContainer.innerHTML = "";
+    
+    introItems.forEach(item => {
+      const btn = document.createElement("button");
+      btn.className = "text-guide-btn";
+      btn.textContent = item.display;
+      btn.addEventListener("click", () => {
+        clearAllActive();
+        btn.classList.add("active");
+        if (item.dual && item.secondImg) {
+          displayTwoImages(item.mainImg, item.secondImg, item.display + " (page 1)", item.display + " (page 2)");
+        } else {
+          displaySingle(item.mainImg, item.display);
+        }
+      });
+      introContainer.appendChild(btn);
+    });
+    
+    readingItems.forEach(item => {
+      const btn = document.createElement("button");
+      btn.className = "text-guide-btn";
+      btn.textContent = item.display;
+      btn.addEventListener("click", () => {
+        clearAllActive();
+        btn.classList.add("active");
+        if (item.dual && item.secondImg) {
+          displayTwoImages(item.mainImg, item.secondImg, item.display + " (page 1)", item.display + " (page 2)");
+        } else {
+          displaySingle(item.mainImg, item.display);
+        }
+      });
+      readingContainer.appendChild(btn);
+    });
+  }
+  
+  // ---- Build Major Arcana Grid (including special guide cards) ----
+  // All items in majorArcanaCards now behave uniformly: they display two images (image1 and image2)
+  function buildMajorGrid() {
+    const gridContainer = document.getElementById("major-grid-container");
+    gridContainer.innerHTML = "";
+    majorArcanaCards.forEach(card => {
+      const cardDiv = document.createElement("div");
+      cardDiv.className = "card-btn";
+      const thumbImg = document.createElement("img");
+      thumbImg.className = "card-thumb";
+      thumbImg.src = IMG_BASE + card.thumb;
+      thumbImg.alt = card.name;
+      thumbImg.onerror = () => { 
+        thumbImg.src = "data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 150'%3E%3Crect width='100' height='150' fill='%233b2a22'/%3E%3Ctext x='50%25' y='50%25' dominant-baseline='middle' text-anchor='middle' fill='%23cb9e6b' font-size='10'%3E🃟%3C/text%3E%3C/svg%3E";
+      };
+      const labelSpan = document.createElement("span");
+      labelSpan.className = "card-label";
+      labelSpan.textContent = card.name.length > 18 ? card.name.substring(0,16)+".." : card.name;
+      cardDiv.appendChild(thumbImg);
+      cardDiv.appendChild(labelSpan);
+      
+      cardDiv.addEventListener("click", () => {
+        clearAllActive();
+        cardDiv.classList.add("active-card");
+        // For ALL cards in majorArcanaCards (guides + actual arcana): display two images
+        // image1 = thumbnail page, image2 = description page
+        if (card.image1 && card.image2) {
+          displayTwoImages(card.image1, card.image2, `${card.name} · Thumbnail Page`, `${card.name} · Description Page`);
+        } else {
+          // fallback (should not happen with current data structure)
+          displaySingle(card.thumb, card.name);
+        }
+      });
+      gridContainer.appendChild(cardDiv);
+    });
+  }
+  
+  // ---- Minor Arcana: expandable suits with text-only buttons that show single desc image ----
+  function buildMinorArcanaAccordion() {
+    const accordionContainer = document.getElementById("minor-arcana-accordion");
+    accordionContainer.innerHTML = "";
+    
+    minorSuits.forEach(suitData => {
+      const suitDiv = document.createElement("div");
+      suitDiv.className = "minor-suit";
+      const header = document.createElement("div");
+      header.className = "suit-header";
+      header.innerHTML = `<span>${suitData.icon}  ${suitData.suit}  (${suitData.cards.length} cards)</span><span class="toggle-icon">▼</span>`;
+      const cardsContainer = document.createElement("div");
+      cardsContainer.className = "suit-cards";
+      
+      // populate cards (text buttons)
+      suitData.cards.forEach(card => {
+        const cardBtn = document.createElement("div");
+        cardBtn.className = "minor-card-btn";
+        cardBtn.innerHTML = `<div class="minor-card-name">${card.name}</div>`;
+        cardBtn.addEventListener("click", (e) => {
+          e.stopPropagation();
+          clearAllActive();
+          cardBtn.classList.add("active-minor");
+          // display the single description image for minor arcana card
+          if (card.descImg) {
+            displaySingle(card.descImg, `${card.name} · Guide Page`);
+          } else {
+            displaySingle("fallback_minor.jpg", card.name);
+          }
+        });
+        cardsContainer.appendChild(cardBtn);
+      });
+      
+      header.addEventListener("click", () => {
+        cardsContainer.classList.toggle("open");
+        header.querySelector(".toggle-icon").textContent = cardsContainer.classList.contains("open") ? "▲" : "▼";
+      });
+      suitDiv.appendChild(header);
+      suitDiv.appendChild(cardsContainer);
+      accordionContainer.appendChild(suitDiv);
+    });
+  }
+  
+  // Initialize everything
+  buildTextButtons();
+  buildMajorGrid();
+  buildMinorArcanaAccordion();
+  
+  // initial placeholder
+  document.getElementById("viewerContent").innerHTML = `<div class="fallback-message">🔮 Click any guide, Major card, or Minor card to reveal sacred pages.<br>✨ All Major Arcana cards & Guides display two images (thumbnail page + description page).</div>`;
+  
+  console.log("Tarot guide ready: All Major Arcana cards + Guide cards display two images (thumb + desc). No redundant isGuide property.");
+</script>
+</body>
+</html>
