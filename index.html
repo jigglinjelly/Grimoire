@@ -332,7 +332,177 @@
 <script>
   // ---------- IMAGE BASE PATH (change if needed) ----------
   const IMG_BASE = "https://raw.githubusercontent.com/jigglinjelly/Grimoire/main/images/";
+// ---------- IMAGE PRELOADING SYSTEM ----------
+// List of all images to preload (both Major Arcana and Minor Arcana)
+const preloadImageList = [];
 
+// 1) Add all Text Guide images
+const allTextImages = [
+  ...introItems.map(item => item.mainImg),
+  ...introItems.filter(item => item.secondImg).map(item => item.secondImg),
+  ...readingItems.map(item => item.mainImg),
+  ...readingItems.filter(item => item.secondImg).map(item => item.secondImg)
+];
+
+// 2) Add all Major Arcana images (thumbnails + both display images)
+majorArcanaCards.forEach(card => {
+  if (card.thumb) preloadImageList.push(card.thumb);
+  if (card.image1) preloadImageList.push(card.image1);
+  if (card.image2) preloadImageList.push(card.image2);
+});
+
+// 3) Add all Minor Arcana description images
+minorSuits.forEach(suit => {
+  suit.cards.forEach(card => {
+    if (card.descImg) preloadImageList.push(card.descImg);
+  });
+});
+
+// 4) Add all Text Guide images
+allTextImages.forEach(img => {
+  if (img && !preloadImageList.includes(img)) preloadImageList.push(img);
+});
+
+// Remove duplicates
+const uniqueImages = [...new Set(preloadImageList)];
+
+// Preload counter and progress indicator
+let loadedCount = 0;
+let totalImages = uniqueImages.length;
+let preloadComplete = false;
+
+// Create a subtle loading indicator
+const loadingBar = document.createElement('div');
+loadingBar.id = 'preload-status';
+loadingBar.style.cssText = `
+  position: fixed;
+  bottom: 20px;
+  right: 20px;
+  background: #2c2220cc;
+  backdrop-filter: blur(8px);
+  padding: 8px 16px;
+  border-radius: 40px;
+  font-size: 0.75rem;
+  color: #f3e9d2;
+  border: 1px solid #b87c4f;
+  z-index: 9999;
+  font-family: monospace;
+  pointer-events: none;
+  transition: opacity 0.5s;
+`;
+loadingBar.innerHTML = `📀 Loading images: 0/${totalImages}`;
+document.body.appendChild(loadingBar);
+
+// Preload function
+function preloadImages() {
+  if (totalImages === 0) {
+    loadingBar.style.opacity = '0';
+    setTimeout(() => loadingBar.remove(), 1000);
+    return;
+  }
+
+  let preloaded = 0;
+  
+  uniqueImages.forEach(imagePath => {
+    const img = new Image();
+    img.onload = () => {
+      preloaded++;
+      loadedCount = preloaded;
+      loadingBar.innerHTML = `📀 Loading images: ${loadedCount}/${totalImages}`;
+      if (loadedCount === totalImages) {
+        preloadComplete = true;
+        loadingBar.innerHTML = `✅ All images ready! (${totalImages})`;
+        setTimeout(() => {
+          loadingBar.style.opacity = '0';
+          setTimeout(() => loadingBar.remove(), 800);
+        }, 1500);
+      }
+    };
+    img.onerror = () => {
+      // Still count errors as "loaded" to avoid infinite waiting
+      preloaded++;
+      loadedCount = preloaded;
+      loadingBar.innerHTML = `📀 Loading images: ${loadedCount}/${totalImages}`;
+      if (loadedCount === totalImages) {
+        preloadComplete = true;
+        loadingBar.innerHTML = `⚠️ ${totalImages} images loaded (some missing)`;
+        setTimeout(() => {
+          loadingBar.style.opacity = '0';
+          setTimeout(() => loadingBar.remove(), 1500);
+        }, 1500);
+      }
+    };
+    img.src = IMG_BASE + imagePath;
+  });
+}
+
+// Start preloading after page load
+window.addEventListener('load', () => {
+  setTimeout(preloadImages, 100);
+});
+
+// Optional: Add a visual loading skeleton for the viewer
+const originalViewerContent = document.getElementById('viewerContent').innerHTML;
+const viewerContainer = document.getElementById('viewerContent');
+
+// Show loading state on first click if images aren't ready
+function showLoadingState() {
+  if (!preloadComplete && viewerContainer && !viewerContainer.querySelector('.loading-skeleton')) {
+    const skeleton = document.createElement('div');
+    skeleton.className = 'loading-skeleton';
+    skeleton.style.cssText = `
+      display: flex;
+      gap: 1.8rem;
+      justify-content: center;
+      flex-wrap: wrap;
+    `;
+    skeleton.innerHTML = `
+      <div class="image-card" style="opacity:0.6;">
+        <div style="width:280px; height:380px; background:linear-gradient(110deg, #2b211d 8%, #3f2e26 18%, #2b211d 33%); background-size:200% 100%; animation: shimmer 1.2s linear infinite; border-radius:16px;"></div>
+        <div class="image-caption">⟳ loading...</div>
+      </div>
+      <div class="image-card" style="opacity:0.6;">
+        <div style="width:280px; height:380px; background:linear-gradient(110deg, #2b211d 8%, #3f2e26 18%, #2b211d 33%); background-size:200% 100%; animation: shimmer 1.2s linear infinite; border-radius:16px;"></div>
+        <div class="image-caption">⟳ loading...</div>
+      </div>
+    `;
+    viewerContainer.innerHTML = '';
+    viewerContainer.appendChild(skeleton);
+  }
+}
+
+// Add shimmer animation to styles
+const styleShimmer = document.createElement('style');
+styleShimmer.textContent = `
+  @keyframes shimmer {
+    0% { background-position: 200% 0; }
+    100% { background-position: -200% 0; }
+  }
+`;
+document.head.appendChild(styleShimmer);
+
+// Override display functions to show loading indicator when preload not complete
+const originalDisplayTwo = displayTwoImages;
+const originalDisplaySingle = displaySingle;
+
+window.displayTwoImages = function(imgSrc1, imgSrc2, caption1, caption2) {
+  if (!preloadComplete && loadedCount < totalImages * 0.7) {
+    showLoadingState();
+  }
+  originalDisplayTwo(imgSrc1, imgSrc2, caption1, caption2);
+};
+
+window.displaySingle = function(imageSrc, caption) {
+  if (!preloadComplete && loadedCount < totalImages * 0.7) {
+    showLoadingState();
+  }
+  originalDisplaySingle(imageSrc, caption);
+};
+
+// Bind back the functions
+displayTwoImages = window.displayTwoImages;
+displaySingle = window.displaySingle;
+  
   // ---------- TEXT GUIDES (some have dual images) ----------
   const introItems = [
     { display: "Welcome to the Coven", mainImg: "welcome_coven.jpg", secondImg: "welcome_coven_detail.jpg", dual: true },
@@ -346,9 +516,9 @@
     { display: "What to Ask", mainImg: "what_to_ask.jpg", secondImg: null, dual: false },
     { display: "Getting Started with Tarot Spreads", mainImg: "tarot_spreads_start.jpg", secondImg: null, dual: false },
     { display: "Which-Witch Tarot Spread", mainImg: "which_witch_spread.jpg", secondImg: "which_witch_spread_page2.jpg", dual: true },
-    { display: "Lilia's Safe-Passage Tarot Spread", mainImg: "lilia_safe_passage.jpg", secondImg: null, dual: false },
-    { display: "About the Author", mainImg: "about_author.jpg", secondImg: null, dual: false },
-    { display: "About the Illustrator", mainImg: "about_illustrator.jpg", secondImg: null, dual: false }
+    { display: "Lilia's Safe-Passage Tarot Spread", mainImg: "lilia_safe_passage.jpg", secondImg: null, dual: false }
+   // { display: "About the Author", mainImg: "about_author.jpg", secondImg: null, dual: false },
+   // { display: "About the Illustrator", mainImg: "about_illustrator.jpg", secondImg: null, dual: false }
   ];
   
   // ---------- MAJOR ARCANA (22 cards) + two special guide cards: "Major Arcana Guide" and "Minor Arcana Guide" ----------
