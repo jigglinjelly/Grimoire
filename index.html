@@ -3,7 +3,7 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=yes">
-  <title>Witches' Tarot Guidebook</title>
+  <title>Witches' Tarot Guidebook · Zoom & Toggle Readings</title>
   <style>
     * {
       margin: 0;
@@ -480,6 +480,11 @@
       .reading-card { width: 100px; }
       .zoom-close { top: -10px; right: -10px; width: 32px; height: 32px; font-size: 18px; }
     }
+    @keyframes fadeOut {
+      0% { opacity: 1; transform: translateX(-50%) translateY(0); }
+      70% { opacity: 1; }
+      100% { opacity: 0; transform: translateX(-50%) translateY(-20px); display: none; }
+    }
   </style>
 </head>
 <body>
@@ -809,6 +814,220 @@
   rebuildOriginalUI();
   currentTemplate = "one";
   renderSpread();
+    // ---------- EASTER EGG: LILIA'S SECRET COMBINATION ----------
+  const SECRET_COMBINATION = [
+    "Queen of Cups",
+    "Three of Pentacles",
+    "Knight of Wands",
+    "II · The High Priestess",
+    "Three of Swords",
+    "XVI · The Tower",
+    "XIII · Death"
+  ];
+  
+  let easterEggActive = false;
+  let secretModeEnabled = false;
+  let safePassageClickCount = 0;
+  let clickTimer = null;
+  
+  function showEasterEggToast(message, isSuccess = false) {
+    const existingToast = document.querySelector('.easter-egg-toast');
+    if (existingToast) existingToast.remove();
+    
+    const toast = document.createElement('div');
+    toast.className = 'easter-egg-toast';
+    toast.textContent = message;
+    toast.style.cssText = `
+      position: fixed;
+      bottom: 80px;
+      left: 50%;
+      transform: translateX(-50%);
+      background: ${isSuccess ? '#2c4522cc' : '#2c2220cc'};
+      backdrop-filter: blur(8px);
+      padding: 10px 20px;
+      border-radius: 40px;
+      font-size: 0.85rem;
+      color: ${isSuccess ? '#a8e6a0' : '#f5cb8b'};
+      border: 1px solid ${isSuccess ? '#6aab5a' : '#e4b363'};
+      z-index: 9999;
+      font-family: monospace;
+      pointer-events: none;
+      white-space: nowrap;
+      font-weight: bold;
+    `;
+    document.body.appendChild(toast);
+    
+    setTimeout(() => {
+      if (toast.parentNode) toast.remove();
+    }, 3000);
+  }
+  
+  function resetSecretClickCount() {
+    safePassageClickCount = 0;
+    if (clickTimer) clearTimeout(clickTimer);
+    clickTimer = null;
+    
+    if (!secretModeEnabled && !easterEggActive) {
+      const safeBtn = document.querySelector('.template-btn[data-template="safe"]');
+      if (safeBtn) {
+        safeBtn.style.boxShadow = '';
+        safeBtn.style.borderColor = '';
+      }
+    }
+  }
+  
+  function onSafePassageButtonClick(btnElement) {
+    if (secretModeEnabled || easterEggActive) return;
+    
+    safePassageClickCount++;
+    
+    btnElement.style.transform = 'scale(0.98)';
+    setTimeout(() => {
+      if (btnElement) btnElement.style.transform = '';
+    }, 150);
+    
+    // Show progress toast on clicks 4, 5, and 6
+    if (safePassageClickCount === 4 || safePassageClickCount === 5 || safePassageClickCount === 6) {
+      showEasterEggToast(`🔮 ${7 - safePassageClickCount} more clicks to unlock the secret...`, false);
+    }
+    
+    if (clickTimer) clearTimeout(clickTimer);
+    clickTimer = setTimeout(() => {
+      if (safePassageClickCount < 7) {
+        if (safePassageClickCount > 0 && safePassageClickCount < 7) {
+          showEasterEggToast("✨ The moment passes... The secret remains hidden.", false);
+        }
+        resetSecretClickCount();
+      }
+    }, 3000);
+    
+    if (safePassageClickCount >= 7) {
+      easterEggActive = true;
+      secretModeEnabled = true;
+      
+      showEasterEggToast("🐚✨ A hidden path reveals itself! The cards stir with ancient magic... ✨🐚", true);
+      
+      btnElement.style.transition = 'all 0.3s';
+      btnElement.style.boxShadow = '0 0 20px #e4b363, inset 0 0 10px rgba(228, 179, 99, 0.3)';
+      btnElement.style.borderColor = '#f5cb8b';
+      btnElement.style.backgroundColor = '#6d4732';
+      
+      const drawBtn = document.getElementById('drawReadingBtn');
+      if (drawBtn) {
+        drawBtn.style.transition = 'all 0.3s';
+        drawBtn.style.boxShadow = '0 0 20px #e4b363, inset 0 0 10px rgba(228, 179, 99, 0.3)';
+        drawBtn.style.border = '1px solid #f5cb8b';
+        drawBtn.style.animation = 'pulseGlow 1.5s infinite';
+      }
+      
+      if (!document.querySelector('#pulseGlowStyle')) {
+        const pulseStyle = document.createElement('style');
+        pulseStyle.id = 'pulseGlowStyle';
+        pulseStyle.textContent = `
+          @keyframes pulseGlow {
+            0% { box-shadow: 0 0 5px #e4b363; border-color: #e4b363; }
+            50% { box-shadow: 0 0 25px #f5cb8b; border-color: #f5cb8b; }
+            100% { box-shadow: 0 0 5px #e4b363; border-color: #e4b363; }
+          }
+        `;
+        document.head.appendChild(pulseStyle);
+      }
+      
+      resetSecretClickCount();
+    }
+  }
+  
+  // Store the original generateReading function before overriding
+  const originalGenerateReading = generateReading;
+  
+  // Override generateReading to check for easter egg
+  generateReading = function() {
+    let count = 1;
+    if (currentTemplate === "three") count = 3;
+    else if (currentTemplate === "whichwitch") count = 4;
+    else if (currentTemplate === "safe") count = 7;
+    
+    if (currentTemplate === "safe" && secretModeEnabled) {
+      // Use secret combination
+      currentSpread = [...SECRET_COMBINATION];
+      showEasterEggToast("🌙✨ The secret vision unfolds before you! ✨🌙", true);
+      
+      // Remove glows
+      const safeBtn = document.querySelector('.template-btn[data-template="safe"]');
+      if (safeBtn) {
+        safeBtn.style.boxShadow = '';
+        safeBtn.style.borderColor = '';
+        safeBtn.style.backgroundColor = '';
+      }
+      const drawBtn = document.getElementById('drawReadingBtn');
+      if (drawBtn) {
+        drawBtn.style.boxShadow = '';
+        drawBtn.style.border = '';
+        drawBtn.style.animation = '';
+      }
+      
+      secretModeEnabled = false;
+      easterEggActive = false;
+    } else {
+      // Normal random draw
+      currentSpread = originalGenerateReading();
+    }
+    
+    cardImageModes = {};
+    renderSpread();
+    return currentSpread;
+  };
+  
+  // Hook into the Safe Passage template button
+  function setupEasterEggTrigger() {
+    const safePassageBtn = document.querySelector('.template-btn[data-template="safe"]');
+    if (safePassageBtn && !safePassageBtn._easterEggHooked) {
+      safePassageBtn._easterEggHooked = true;
+      
+      safePassageBtn.addEventListener('click', (e) => {
+        onSafePassageButtonClick(safePassageBtn);
+      });
+    }
+  }
+  
+  // Set up observer for dynamically created buttons
+  const easterEggObserver = new MutationObserver(() => {
+    setupEasterEggTrigger();
+  });
+  easterEggObserver.observe(document.body, { childList: true, subtree: true });
+  
+  // Initial setup
+  setTimeout(setupEasterEggTrigger, 500);
+  
+  // Reset easter egg when switching away from Safe Passage
+  const allTemplateBtns = document.querySelectorAll('.template-btn');
+  allTemplateBtns.forEach(btn => {
+    btn.addEventListener('click', () => {
+      if (btn.getAttribute('data-template') !== 'safe') {
+        if (secretModeEnabled || easterEggActive) {
+          secretModeEnabled = false;
+          easterEggActive = false;
+          
+          const safeBtn = document.querySelector('.template-btn[data-template="safe"]');
+          if (safeBtn) {
+            safeBtn.style.boxShadow = '';
+            safeBtn.style.borderColor = '';
+            safeBtn.style.backgroundColor = '';
+          }
+          const drawBtn = document.getElementById('drawReadingBtn');
+          if (drawBtn) {
+            drawBtn.style.boxShadow = '';
+            drawBtn.style.border = '';
+            drawBtn.style.animation = '';
+          }
+        }
+        resetSecretClickCount();
+      }
+    });
+  });
+  
+  console.log("%c✨ A secret waits within Lilia's Safe Passage... Click it 7 times to awaken the magic. ✨", "color: #e4b363; font-size: 14px; font-style: italic;");
+
 </script>
 </body>
 </html>
