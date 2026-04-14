@@ -3,7 +3,7 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=yes">
-  <title>Witches' Tarot Guidebook · Major & Minor Arcana Grimoire</title>
+  <title>Witches' Tarot Guidebook · Zoom & Toggle Readings</title>
   <style>
     * {
       margin: 0;
@@ -29,6 +29,43 @@
       box-shadow: 0 20px 40px rgba(0, 0, 0, 0.5), inset 0 1px 0 rgba(255, 255, 255, 0.05);
       overflow: hidden;
       border: 1px solid #5e4b3c;
+    }
+
+    /* TAB BAR */
+    .tab-bar {
+      display: flex;
+      border-bottom: 1px solid #5e4b3c;
+      background: #1f1917cc;
+      padding: 0 1rem;
+      gap: 0.5rem;
+    }
+    .tab-btn {
+      background: transparent;
+      border: none;
+      color: #cfb99a;
+      font-size: 1.1rem;
+      padding: 0.8rem 1.8rem;
+      cursor: pointer;
+      font-family: inherit;
+      font-weight: bold;
+      border-radius: 30px 30px 0 0;
+      transition: all 0.2s;
+    }
+    .tab-btn:hover {
+      background: #4a3729;
+      color: #f7e5c2;
+    }
+    .tab-btn.active {
+      background: #2c201b;
+      color: #f5cb8b;
+      border-bottom: 3px solid #e4b363;
+    }
+
+    .tab-content {
+      display: none;
+    }
+    .tab-content.active {
+      display: block;
     }
 
     .dashboard {
@@ -269,6 +306,7 @@
       object-fit: contain;
       border-radius: 16px;
       box-shadow: 0 8px 18px black;
+      cursor: pointer;
     }
     .image-caption {
       margin-top: 0.5rem;
@@ -290,380 +328,487 @@
       text-align: center;
     }
 
+    /* READING TAB STYLES */
+    .reading-controls {
+      display: flex;
+      gap: 1rem;
+      flex-wrap: wrap;
+      margin-bottom: 2rem;
+      padding: 1rem;
+      background: #2a201c80;
+      border-radius: 30px;
+      align-items: center;
+    }
+    .template-btn {
+      background: #362a24;
+      border: 1px solid #b87c4f;
+      color: #f3e2c9;
+      padding: 0.6rem 1.2rem;
+      border-radius: 40px;
+      cursor: pointer;
+      transition: all 0.2s;
+      font-family: inherit;
+    }
+    .template-btn:hover, .template-btn.active-template {
+      background: #b46f42;
+      border-color: #f7cf94;
+      color: white;
+    }
+    .draw-btn {
+      background: #6d4330;
+      border: none;
+      color: white;
+      padding: 0.6rem 1.8rem;
+      border-radius: 40px;
+      font-weight: bold;
+      cursor: pointer;
+      font-size: 1rem;
+      margin-left: auto;
+    }
+    .draw-btn:hover {
+      background: #8b5a3e;
+      transform: scale(1.02);
+    }
+    .reading-layout {
+      background: #1e1714a0;
+      border-radius: 2rem;
+      padding: 2rem;
+      min-height: 500px;
+    }
+    .cards-spread {
+      display: flex;
+      flex-wrap: wrap;
+      justify-content: center;
+      align-items: center;
+      gap: 1.5rem;
+    }
+    .reading-card {
+      background: #1f1815;
+      border-radius: 20px;
+      padding: 0.6rem;
+      text-align: center;
+      width: 140px;
+      transition: all 0.2s;
+      border: 1px solid #73563f;
+    }
+    .reading-card img {
+      width: 100%;
+      aspect-ratio: 2 / 3;
+      object-fit: cover;
+      border-radius: 12px;
+      cursor: pointer;
+    }
+    .reading-card-name {
+      font-size: 0.7rem;
+      margin-top: 6px;
+      color: #e1c394;
+    }
+    .which-witch-grid {
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      gap: 1.5rem;
+    }
+    .top-card, .bottom-row {
+      display: flex;
+      justify-content: center;
+      gap: 1.5rem;
+      flex-wrap: wrap;
+    }
+
+    /* ZOOM MODAL STYLES */
+    .zoom-modal {
+      position: fixed;
+      top: 0;
+      left: 0;
+      width: 100%;
+      height: 100%;
+      background: rgba(0, 0, 0, 0.92);
+      backdrop-filter: blur(8px);
+      z-index: 10000;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      cursor: pointer;
+    }
+    .zoom-content {
+      position: relative;
+      max-width: 90vw;
+      max-height: 90vh;
+      cursor: default;
+    }
+    .zoom-content img {
+      max-width: 90vw;
+      max-height: 85vh;
+      object-fit: contain;
+      border-radius: 16px;
+      box-shadow: 0 20px 40px rgba(0,0,0,0.5);
+      border: 2px solid #e4b363;
+      cursor: pointer;
+    }
+    .zoom-close {
+      position: absolute;
+      top: -20px;
+      right: -20px;
+      width: 40px;
+      height: 40px;
+      background: #2c2220;
+      border-radius: 50%;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-size: 24px;
+      font-weight: bold;
+      color: #f3e9d2;
+      cursor: pointer;
+      border: 2px solid #b87c4f;
+      transition: all 0.2s;
+      z-index: 10001;
+    }
+    .zoom-close:hover {
+      background: #8b5a3e;
+      transform: scale(1.1);
+    }
+    .zoom-caption {
+      text-align: center;
+      margin-top: 12px;
+      color: #e1c394;
+      font-size: 0.9rem;
+    }
+
     @media (max-width: 760px) {
-      body { padding: 0.8rem; }
-      .sidebar { max-height: 50vh; }
-      .dashboard { flex-direction: column; }
-      .dual-image-container { flex-direction: column; align-items: center; }
+      .reading-card { width: 100px; }
+      .zoom-close { top: -10px; right: -10px; width: 32px; height: 32px; font-size: 18px; }
     }
   </style>
 </head>
 <body>
 <div class="app">
-  <div class="dashboard">
-    <div class="sidebar">
-      <!-- TEXT GUIDES section -->
-      <div class="section-title">📖 Text Guides</div>
-      <div style="margin-bottom: 0.5rem; font-size: 1.2rem; font-weight: bold; color:#e7bf8e;">✨ Introduction</div>
-      <div class="text-buttons" id="intro-buttons"></div>
-      
-      <div style="margin-bottom: 0.5rem; margin-top: 1.5rem; font-size: 1.2rem; font-weight: bold; color:#e7bf8e;">🔮 Tarot Readings</div>
-      <div class="text-buttons" id="reading-buttons"></div>
+  <div class="tab-bar">
+    <button class="tab-btn active" data-tab="guide">📖 Grimoire Guide</button>
+    <button class="tab-btn" data-tab="reading">🔮 Random Readings</button>
+  </div>
 
-      <!-- CARDS section: Major Arcana grid + Minor Arcana expandable suits -->
-      <div class="section-title" style="margin-top: 1.8rem;">🃏 Major Arcana</div>
-      <div class="cards-grid" id="major-grid-container"></div>
-      
-      <div class="section-title" style="margin-top: 0.5rem;">✨ Minor Arcana</div>
-      <div id="minor-arcana-accordion"></div>
-      <div class="footer-note">⚡ click any card/guide — all Major cards & Guides display two images (thumbnail + description).</div>
+  <!-- TAB 1: ORIGINAL GUIDEBOOK -->
+  <div id="tab-guide" class="tab-content active">
+    <div class="dashboard">
+      <div class="sidebar">...</div>
+      <div class="viewer">...</div>
     </div>
+  </div>
 
-    <!-- RIGHT PANEL: dynamic dual image viewer -->
-    <div class="viewer">
-      <div class="viewer-header">🌙  Sacred Pages  🌙</div>
-      <div id="viewerContent" class="dual-image-container">
-        <div class="fallback-message">✨ select a guide or tarot card<br>to reveal the corresponding pages</div>
+  <!-- TAB 2: RANDOM READINGS -->
+  <div id="tab-reading" class="tab-content">
+    <div class="dashboard">
+      <div class="sidebar" style="border-right: none; max-height: none;">
+        <div class="section-title">✨ Choose Spread</div>
+        <div class="reading-controls">
+          <button class="template-btn active-template" data-template="one">🔮 One-card Pull</button>
+          <button class="template-btn" data-template="three">🃏 Three-card Pull</button>
+          <button class="template-btn" data-template="whichwitch">🌀 Which-Witch Spread</button>
+          <button class="template-btn" data-template="safe">🌙 Lilia's Safe Passage</button>
+          <button class="draw-btn" id="drawReadingBtn">🎴 Draw Reading</button>
+        </div>
+        <div class="reading-layout" id="readingLayout">
+          <div class="fallback-message">Select a spread and click "Draw Reading" to begin.</div>
+        </div>
+        <div class="footer-note">✨ Click any card to zoom. For Major Arcana, click the zoomed image again to toggle between art and description.</div>
       </div>
     </div>
   </div>
 </div>
 
 <script>
-  // ---------- IMAGE BASE PATH (change if needed) ----------
+  // ---------- IMAGE BASE PATH ----------
   const IMG_BASE = "https://raw.githubusercontent.com/jigglinjelly/Grimoire/main/images/";
 
-  // ---------- TEXT GUIDES (some have dual images) ----------
-  const introItems = [
-    { display: "Welcome to the Coven", mainImg: "welcome_coven.jpg", secondImg: "welcome_coven_detail.jpg", dual: true },
-    { display: "Tarot Basics", mainImg: "tarot_basics.jpg", secondImg: null, dual: false },
-    { display: "Understanding Court Cards", mainImg: "court_cards.jpg", secondImg: null, dual: false },
-    { display: "Reading Reversals... or Not", mainImg: "reading_reversals.jpg", secondImg: null, dual: false }
+  // ---------- FULL DECK (excludes guide cards) ----------
+  const majorDeck = [
+    "0 · The Fool", "I · The Magician", "II · The High Priestess", "III · The Empress", "IV · The Emperor",
+    "V · The Hierophant", "VI · The Lovers", "VII · The Chariot", "VIII · Strength", "IX · The Hermit",
+    "X · Wheel of Fortune", "XI · Justice", "XII · The Hanged Man", "XIII · Death", "XIV · Temperance",
+    "XV · The Devil", "XVI · The Tower", "XVII · The Star", "XVIII · The Moon", "XIX · The Sun",
+    "XX · Judgement", "XXI · The World"
   ];
   
-  const readingItems = [
-    { display: "Opening and Closing a Reading", mainImg: "opening_closing_reading.jpg", secondImg: "opening_closing_part2.jpg", dual: true },
-    { display: "What to Ask", mainImg: "what_to_ask.jpg", secondImg: null, dual: false },
-    { display: "Getting Started with Tarot Spreads", mainImg: "tarot_spreads_start.jpg", secondImg: null, dual: false },
-    { display: "Which-Witch Tarot Spread", mainImg: "which_witch_spread.jpg", secondImg: "which_witch_spread_page2.jpg", dual: true },
-    { display: "Lilia's Safe-Passage Tarot Spread", mainImg: "lilia_safe_passage.jpg", secondImg: null, dual: false }
-  ];
-  
-  // ---------- MAJOR ARCANA (22 cards) + two special guide cards ----------
-  const majorArcanaCards = [
-    { name: "📘 Major Arcana Guide", thumb: "major_guide_thumb.jpg", image1: "major_guide_thumb.jpg", image2: "major_guide_desc.jpg" },
-    { name: "📙 Minor Arcana Guide", thumb: "minor_guide_thumb.jpg", image1: "minor_guide_thumb.jpg", image2: "minor_guide_desc.jpg" },
-    { name: "0 · The Fool", thumb: "thumb_fool.jpg", image1: "thumb_fool.jpg", image2: "desc_fool.jpg" },
-    { name: "I · The Magician", thumb: "thumb_magician.jpg", image1: "thumb_magician.jpg", image2: "desc_magician.jpg" },
-    { name: "II · The High Priestess", thumb: "thumb_high_priestess.jpg", image1: "thumb_high_priestess.jpg", image2: "desc_high_priestess.jpg" },
-    { name: "III · The Empress", thumb: "thumb_empress.jpg", image1: "thumb_empress.jpg", image2: "desc_empress.jpg" },
-    { name: "IV · The Emperor", thumb: "thumb_emperor.jpg", image1: "thumb_emperor.jpg", image2: "desc_emperor.jpg" },
-    { name: "V · The Hierophant", thumb: "thumb_hierophant.jpg", image1: "thumb_hierophant.jpg", image2: "desc_hierophant.jpg" },
-    { name: "VI · The Lovers", thumb: "thumb_lovers.jpg", image1: "thumb_lovers.jpg", image2: "desc_lovers.jpg" },
-    { name: "VII · The Chariot", thumb: "thumb_chariot.jpg", image1: "thumb_chariot.jpg", image2: "desc_chariot.jpg" },
-    { name: "VIII · Strength", thumb: "thumb_strength.jpg", image1: "thumb_strength.jpg", image2: "desc_strength.jpg" },
-    { name: "IX · The Hermit", thumb: "thumb_hermit.jpg", image1: "thumb_hermit.jpg", image2: "desc_hermit.jpg" },
-    { name: "X · Wheel of Fortune", thumb: "thumb_wheel_fortune.jpg", image1: "thumb_wheel_fortune.jpg", image2: "desc_wheel_fortune.jpg" },
-    { name: "XI · Justice", thumb: "thumb_justice.jpg", image1: "thumb_justice.jpg", image2: "desc_justice.jpg" },
-    { name: "XII · The Hanged Man", thumb: "thumb_hanged_man.jpg", image1: "thumb_hanged_man.jpg", image2: "desc_hanged_man.jpg" },
-    { name: "XIII · Death", thumb: "thumb_death.jpg", image1: "thumb_death.jpg", image2: "desc_death.jpg" },
-    { name: "XIV · Temperance", thumb: "thumb_temperance.jpg", image1: "thumb_temperance.jpg", image2: "desc_temperance.jpg" },
-    { name: "XV · The Devil", thumb: "thumb_devil.jpg", image1: "thumb_devil.jpg", image2: "desc_devil.jpg" },
-    { name: "XVI · The Tower", thumb: "thumb_tower.jpg", image1: "thumb_tower.jpg", image2: "desc_tower.jpg" },
-    { name: "XVII · The Star", thumb: "thumb_star.jpg", image1: "thumb_star.jpg", image2: "desc_star.jpg" },
-    { name: "XVIII · The Moon", thumb: "thumb_moon.jpg", image1: "thumb_moon.jpg", image2: "desc_moon.jpg" },
-    { name: "XIX · The Sun", thumb: "thumb_sun.jpg", image1: "thumb_sun.jpg", image2: "desc_sun.jpg" },
-    { name: "XX · Judgement", thumb: "thumb_judgement.jpg", image1: "thumb_judgement.jpg", image2: "desc_judgement.jpg" },
-    { name: "XXI · The World", thumb: "thumb_world.jpg", image1: "thumb_world.jpg", image2: "desc_world.jpg" }
-  ];
-  
-  // ---------- MINOR ARCANA DATA ----------
-  const minorSuits = [
-    { suit: "Wands", icon: "🔥", cards: generateSuitCards("Wands") },
-    { suit: "Cups", icon: "💧", cards: generateSuitCards("Cups") },
-    { suit: "Swords", icon: "⚔️", cards: generateSuitCards("Swords") },
-    { suit: "Pentacles", icon: "🪙", cards: generateSuitCards("Pentacles") }
-  ];
-  
-  function generateSuitCards(suit) {
-    const ranks = ["Ace", "Two", "Three", "Four", "Five", "Six", "Seven", "Eight", "Nine", "Ten", "Page", "Knight", "Queen", "King"];
-    return ranks.map(rank => ({
-      name: `${rank} of ${suit}`,
-      descImg: `desc_${rank.toLowerCase()}_${suit.toLowerCase()}.jpg`
-    }));
-  }
-  
-  // ----- Helper: display two images in the viewer -----
-  function displayTwoImages(imgSrc1, imgSrc2, caption1, caption2) {
-    const viewerDiv = document.getElementById("viewerContent");
-    viewerDiv.innerHTML = `
-      <div class="dual-image-container">
-        <div class="image-card">
-          <img src="${IMG_BASE}${imgSrc1}" alt="image 1" onerror="this.parentElement.innerHTML='<div class=\\'fallback-message\\' style=\\'padding:1rem\\'>⚠️ missing: ${imgSrc1}</div>'">
-          <div class="image-caption">${caption1}</div>
-        </div>
-        <div class="image-card">
-          <img src="${IMG_BASE}${imgSrc2}" alt="image 2" onerror="this.parentElement.innerHTML='<div class=\\'fallback-message\\' style=\\'padding:1rem\\'>⚠️ missing: ${imgSrc2}</div>'">
-          <div class="image-caption">${caption2}</div>
-        </div>
-      </div>
-    `;
-  }
-  
-  function displaySingle(imageSrc, caption = "Grimoire Page") {
-    const viewerDiv = document.getElementById("viewerContent");
-    viewerDiv.innerHTML = `
-      <div class="dual-image-container">
-        <div class="image-card">
-          <img src="${IMG_BASE}${imageSrc}" alt="page" onerror="this.parentElement.innerHTML='<div class=\\'fallback-message\\'>⚠️ image not found: ${imageSrc}</div>'">
-          <div class="image-caption">${caption}</div>
-        </div>
-      </div>
-    `;
-  }
-  
-  // Clear active states
-  function clearAllActive() {
-    document.querySelectorAll('.text-guide-btn').forEach(btn => btn.classList.remove('active'));
-    document.querySelectorAll('.card-btn').forEach(btn => btn.classList.remove('active-card'));
-    document.querySelectorAll('.minor-card-btn').forEach(btn => btn.classList.remove('active-minor'));
-  }
-  
-  // ---- Build Text Guides ----
-  function buildTextButtons() {
-    const introContainer = document.getElementById("intro-buttons");
-    const readingContainer = document.getElementById("reading-buttons");
-    introContainer.innerHTML = "";
-    readingContainer.innerHTML = "";
-    
-    introItems.forEach(item => {
-      const btn = document.createElement("button");
-      btn.className = "text-guide-btn";
-      btn.textContent = item.display;
-      btn.addEventListener("click", () => {
-        clearAllActive();
-        btn.classList.add("active");
-        if (item.dual && item.secondImg) {
-          displayTwoImages(item.mainImg, item.secondImg, item.display + " (page 1)", item.display + " (page 2)");
-        } else {
-          displaySingle(item.mainImg, item.display);
-        }
-      });
-      introContainer.appendChild(btn);
+  const minorRanks = ["Ace", "Two", "Three", "Four", "Five", "Six", "Seven", "Eight", "Nine", "Ten", "Page", "Knight", "Queen", "King"];
+  const minorSuitsList = ["Wands", "Cups", "Swords", "Pentacles"];
+  const minorDeck = [];
+  minorSuitsList.forEach(suit => {
+    minorRanks.forEach(rank => {
+      minorDeck.push(`${rank} of ${suit}`);
     });
-    
-    readingItems.forEach(item => {
-      const btn = document.createElement("button");
-      btn.className = "text-guide-btn";
-      btn.textContent = item.display;
-      btn.addEventListener("click", () => {
-        clearAllActive();
-        btn.classList.add("active");
-        if (item.dual && item.secondImg) {
-          displayTwoImages(item.mainImg, item.secondImg, item.display + " (page 1)", item.display + " (page 2)");
-        } else {
-          displaySingle(item.mainImg, item.display);
-        }
-      });
-      readingContainer.appendChild(btn);
-    });
-  }
+  });
+  const FULL_DECK = [...majorDeck, ...minorDeck];
   
-  // ---- Build Major Arcana Grid ----
-  function buildMajorGrid() {
-    const gridContainer = document.getElementById("major-grid-container");
-    gridContainer.innerHTML = "";
-    majorArcanaCards.forEach(card => {
-      const cardDiv = document.createElement("div");
-      cardDiv.className = "card-btn";
-      const thumbImg = document.createElement("img");
-      thumbImg.className = "card-thumb";
-      thumbImg.src = IMG_BASE + card.thumb;
-      thumbImg.alt = card.name;
-      thumbImg.onerror = () => { 
-        thumbImg.src = "data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 150'%3E%3Crect width='100' height='150' fill='%233b2a22'/%3E%3Ctext x='50%25' y='50%25' dominant-baseline='middle' text-anchor='middle' fill='%23cb9e6b' font-size='10'%3E🃟%3C/text%3E%3C/svg%3E";
+  function getCardImage(cardName, type = "thumb") {
+    if (majorDeck.includes(cardName)) {
+      const cardKeyMap = {
+        "0 · The Fool": "fool",
+        "I · The Magician": "magician",
+        "II · The High Priestess": "high_priestess",
+        "III · The Empress": "empress",
+        "IV · The Emperor": "emperor",
+        "V · The Hierophant": "hierophant",
+        "VI · The Lovers": "lovers",
+        "VII · The Chariot": "chariot",
+        "VIII · Strength": "strength",
+        "IX · The Hermit": "hermit",
+        "X · Wheel of Fortune": "wheel_fortune",
+        "XI · Justice": "justice",
+        "XII · The Hanged Man": "hanged_man",
+        "XIII · Death": "death",
+        "XIV · Temperance": "temperance",
+        "XV · The Devil": "devil",
+        "XVI · The Tower": "tower",
+        "XVII · The Star": "star",
+        "XVIII · The Moon": "moon",
+        "XIX · The Sun": "sun",
+        "XX · Judgement": "judgement",
+        "XXI · The World": "world"
       };
-      const labelSpan = document.createElement("span");
-      labelSpan.className = "card-label";
-      labelSpan.textContent = card.name.length > 18 ? card.name.substring(0,16)+".." : card.name;
-      cardDiv.appendChild(thumbImg);
-      cardDiv.appendChild(labelSpan);
-      
-      cardDiv.addEventListener("click", () => {
-        clearAllActive();
-        cardDiv.classList.add("active-card");
-        if (card.image1 && card.image2) {
-          displayTwoImages(card.image1, card.image2, `${card.name} · Thumbnail Page`, `${card.name} · Description Page`);
-        } else {
-          displaySingle(card.thumb, card.name);
-        }
-      });
-      gridContainer.appendChild(cardDiv);
-    });
-  }
-  
-  // ---- Build Minor Arcana Accordion ----
-  function buildMinorArcanaAccordion() {
-    const accordionContainer = document.getElementById("minor-arcana-accordion");
-    accordionContainer.innerHTML = "";
-    
-    minorSuits.forEach(suitData => {
-      const suitDiv = document.createElement("div");
-      suitDiv.className = "minor-suit";
-      const header = document.createElement("div");
-      header.className = "suit-header";
-      header.innerHTML = `<span>${suitData.icon}  ${suitData.suit}  (${suitData.cards.length} cards)</span><span class="toggle-icon">▼</span>`;
-      const cardsContainer = document.createElement("div");
-      cardsContainer.className = "suit-cards";
-      
-      suitData.cards.forEach(card => {
-        const cardBtn = document.createElement("div");
-        cardBtn.className = "minor-card-btn";
-        cardBtn.innerHTML = `<div class="minor-card-name">${card.name}</div>`;
-        cardBtn.addEventListener("click", (e) => {
-          e.stopPropagation();
-          clearAllActive();
-          cardBtn.classList.add("active-minor");
-          if (card.descImg) {
-            displaySingle(card.descImg, `${card.name} · Guide Page`);
-          } else {
-            displaySingle("fallback_minor.jpg", card.name);
-          }
-        });
-        cardsContainer.appendChild(cardBtn);
-      });
-      
-      header.addEventListener("click", () => {
-        cardsContainer.classList.toggle("open");
-        header.querySelector(".toggle-icon").textContent = cardsContainer.classList.contains("open") ? "▲" : "▼";
-      });
-      suitDiv.appendChild(header);
-      suitDiv.appendChild(cardsContainer);
-      accordionContainer.appendChild(suitDiv);
-    });
-  }
-  
-  // ---------- IMAGE PRELOADING SYSTEM (MOVED HERE - AFTER data definitions) ----------
-  const preloadImageList = [];
-
-  // Collect all Text Guide images
-  const allTextImages = [
-    ...introItems.map(item => item.mainImg),
-    ...introItems.filter(item => item.secondImg).map(item => item.secondImg),
-    ...readingItems.map(item => item.mainImg),
-    ...readingItems.filter(item => item.secondImg).map(item => item.secondImg)
-  ];
-
-  // Collect all Major Arcana images
-  majorArcanaCards.forEach(card => {
-    if (card.thumb) preloadImageList.push(card.thumb);
-    if (card.image1) preloadImageList.push(card.image1);
-    if (card.image2) preloadImageList.push(card.image2);
-  });
-
-  // Collect all Minor Arcana images
-  minorSuits.forEach(suit => {
-    suit.cards.forEach(card => {
-      if (card.descImg) preloadImageList.push(card.descImg);
-    });
-  });
-
-  // Add Text Guide images
-  allTextImages.forEach(img => {
-    if (img && !preloadImageList.includes(img)) preloadImageList.push(img);
-  });
-
-  const uniqueImages = [...new Set(preloadImageList)];
-  let loadedCount = 0;
-  let totalImages = uniqueImages.length;
-  let preloadComplete = false;
-
-  // Create loading indicator
-  const loadingBar = document.createElement('div');
-  loadingBar.id = 'preload-status';
-  loadingBar.style.cssText = `
-    position: fixed;
-    bottom: 20px;
-    right: 20px;
-    background: #2c2220cc;
-    backdrop-filter: blur(8px);
-    padding: 8px 16px;
-    border-radius: 40px;
-    font-size: 0.75rem;
-    color: #f3e9d2;
-    border: 1px solid #b87c4f;
-    z-index: 9999;
-    font-family: monospace;
-    pointer-events: none;
-    transition: opacity 0.5s;
-  `;
-  loadingBar.innerHTML = `📀 Loading images: 0/${totalImages}`;
-  document.body.appendChild(loadingBar);
-
-  function preloadImages() {
-    if (totalImages === 0) {
-      loadingBar.style.opacity = '0';
-      setTimeout(() => loadingBar.remove(), 1000);
-      return;
+      const key = cardKeyMap[cardName];
+      if (type === "thumb") return `thumb_${key}.jpg`;
+      return `desc_${key}.jpg`;
+    } else {
+      const parts = cardName.split(" of ");
+      const rank = parts[0].toLowerCase();
+      const suit = parts[1].toLowerCase();
+      return `desc_${rank}_${suit}.jpg`;
     }
-
-    let preloaded = 0;
-    
-    uniqueImages.forEach(imagePath => {
-      const img = new Image();
-      img.onload = () => {
-        preloaded++;
-        loadedCount = preloaded;
-        loadingBar.innerHTML = `📀 Loading images: ${loadedCount}/${totalImages}`;
-        if (loadedCount === totalImages) {
-          preloadComplete = true;
-          loadingBar.innerHTML = `✅ All images ready! (${totalImages})`;
-          setTimeout(() => {
-            loadingBar.style.opacity = '0';
-            setTimeout(() => loadingBar.remove(), 800);
-          }, 1500);
-        }
-      };
-      img.onerror = () => {
-        preloaded++;
-        loadedCount = preloaded;
-        loadingBar.innerHTML = `📀 Loading images: ${loadedCount}/${totalImages}`;
-        if (loadedCount === totalImages) {
-          preloadComplete = true;
-          loadingBar.innerHTML = `⚠️ ${totalImages} images loaded (some missing)`;
-          setTimeout(() => {
-            loadingBar.style.opacity = '0';
-            setTimeout(() => loadingBar.remove(), 1500);
-          }, 1500);
-        }
-      };
-      img.src = IMG_BASE + imagePath;
-    });
   }
 
-  // Add shimmer animation
-  const styleShimmer = document.createElement('style');
-  styleShimmer.textContent = `
-    @keyframes shimmer {
-      0% { background-position: 200% 0; }
-      100% { background-position: -200% 0; }
-    }
-  `;
-  document.head.appendChild(styleShimmer);
+  let currentSpread = [];
+  let currentTemplate = "one";
+  // Store current image mode for each card (thumb or desc) - only for Major Arcana
+  let cardImageModes = {};
 
-  // Initialize everything and start preloading
-  buildTextButtons();
-  buildMajorGrid();
-  buildMinorArcanaAccordion();
+  // ----- ZOOM MODAL FUNCTIONALITY -----
+  function showZoom(cardName, cardIndex, currentImageSrc, isMajor) {
+    // Remove any existing modal
+    const existingModal = document.querySelector('.zoom-modal');
+    if (existingModal) existingModal.remove();
+    
+    const modal = document.createElement('div');
+    modal.className = 'zoom-modal';
+    
+    const content = document.createElement('div');
+    content.className = 'zoom-content';
+    
+    const img = document.createElement('img');
+    img.src = currentImageSrc;
+    img.alt = cardName;
+    
+    const closeBtn = document.createElement('div');
+    closeBtn.className = 'zoom-close';
+    closeBtn.innerHTML = '✕';
+    
+    const caption = document.createElement('div');
+    caption.className = 'zoom-caption';
+    caption.innerHTML = isMajor ? `${cardName} — Click image to toggle between art and description` : cardName;
+    
+    content.appendChild(closeBtn);
+    content.appendChild(img);
+    content.appendChild(caption);
+    modal.appendChild(content);
+    
+    // Close modal when clicking outside the image or on X
+    modal.addEventListener('click', (e) => {
+      if (e.target === modal || e.target === closeBtn) {
+        modal.remove();
+      }
+    });
+    
+    // For Major Arcana: clicking the zoomed image toggles between thumb and desc
+    if (isMajor) {
+      let currentMode = cardImageModes[`${cardName}_${cardIndex}`] || "thumb";
+      let currentImgSrc = currentImageSrc;
+      
+      img.addEventListener('click', (e) => {
+        e.stopPropagation();
+        // Toggle mode
+        const newMode = currentMode === "thumb" ? "desc" : "thumb";
+        currentMode = newMode;
+        cardImageModes[`${cardName}_${cardIndex}`] = newMode;
+        const newSrc = IMG_BASE + getCardImage(cardName, newMode);
+        img.src = newSrc;
+        currentImgSrc = newSrc;
+        
+        // Also update the thumbnail in the reading spread
+        const cardElement = document.querySelector(`.reading-card[data-cardname="${cardName}"][data-index="${cardIndex}"] img`);
+        if (cardElement) {
+          cardElement.src = newSrc;
+        }
+        
+        caption.innerHTML = `${cardName} — ${newMode === "thumb" ? "Card Art" : "Description"} (click to toggle)`;
+      });
+    }
+    
+    document.body.appendChild(modal);
+  }
   
-  document.getElementById("viewerContent").innerHTML = `<div class="fallback-message">🔮 Click any guide, Major card, or Minor card to reveal sacred pages.<br>✨ All Major Arcana cards & Guides display two images (thumbnail page + description page).</div>`;
+  function renderCard(card, idx, rotated = false) {
+    const mode = cardImageModes[`${card}_${idx}`] || "thumb";
+    const imgSrc = getCardImage(card, mode);
+    const isMajor = majorDeck.includes(card);
+    const rotStyle = rotated ? 'transform:rotate(90deg); margin:1rem 0;' : '';
+    
+    return `<div class="reading-card" data-index="${idx}" data-cardname="${card}" data-ismajor="${isMajor}" style="${rotStyle}">
+      <img src="${IMG_BASE}${imgSrc}" alt="${card}" data-cardname="${card}" data-index="${idx}" data-currentmode="${mode}" onerror="this.src='data:image/svg+xml,%3Csvg xmlns=\'http://www.w3.org/2000/svg\' viewBox=\'0 0 100 150\'%3E%3Crect width=\'100\' height=\'150\' fill=\'%233b2a22\'/%3E%3Ctext x=\'50%25\' y=\'50%25\' dominant-baseline=\'middle\' text-anchor=\'middle\' fill=\'%23cb9e6b\' font-size=\'10\'%3E🃟%3C/text%3E%3C/svg%3E'">
+      <div class="reading-card-name">${card}</div>
+    </div>`;
+  }
   
-  // Start preloading after page load
-  window.addEventListener('load', () => {
-    setTimeout(preloadImages, 100);
+  function attachZoomListeners() {
+    document.querySelectorAll('.reading-card img').forEach(img => {
+      // Remove existing listener to avoid duplicates
+      img.removeEventListener('click', img._zoomHandler);
+      
+      const handler = (e) => {
+        e.stopPropagation();
+        const cardDiv = img.closest('.reading-card');
+        if (!cardDiv) return;
+        const cardName = cardDiv.getAttribute('data-cardname');
+        const cardIndex = cardDiv.getAttribute('data-index');
+        const isMajor = cardDiv.getAttribute('data-ismajor') === 'true';
+        const currentMode = cardImageModes[`${cardName}_${cardIndex}`] || "thumb";
+        const currentSrc = IMG_BASE + getCardImage(cardName, currentMode);
+        
+        showZoom(cardName, parseInt(cardIndex), currentSrc, isMajor);
+      };
+      
+      img._zoomHandler = handler;
+      img.addEventListener('click', handler);
+    });
+  }
+  
+  function renderSpread() {
+    const container = document.getElementById("readingLayout");
+    
+    if (currentTemplate === "one") {
+      if (currentSpread.length) {
+        container.innerHTML = `<div class="cards-spread" style="display:flex; justify-content:center;">${renderCard(currentSpread[0], 0)}</div>`;
+      } else {
+        container.innerHTML = `<div class="cards-spread" style="display:flex; justify-content:center;"><div class="reading-card-placeholder" style="width:140px; height:220px; background:#2a201c80; border-radius:20px; border:2px dashed #73563f; display:flex; align-items:center; justify-content:center; color:#b87c4f;">✨ awaiting draw</div></div>`;
+      }
+    } 
+    else if (currentTemplate === "three") {
+      if (currentSpread.length) {
+        container.innerHTML = `<div class="cards-spread" style="display:flex; flex-wrap:wrap; justify-content:center; gap:2rem;">${currentSpread.map((c, i) => `<div style="text-align:center;">${renderCard(c, i)}</div>`).join('')}</div>`;
+      } else {
+        container.innerHTML = `<div class="cards-spread" style="display:flex; flex-wrap:wrap; justify-content:center; gap:2rem;">${Array(3).fill().map(() => `<div style="text-align:center;"><div class="reading-card-placeholder" style="width:140px; height:220px; background:#2a201c80; border-radius:20px; border:2px dashed #73563f; display:flex; align-items:center; justify-content:center; color:#b87c4f;">✨</div></div>`).join('')}</div>`;
+      }
+    }
+    else if (currentTemplate === "whichwitch") {
+      if (currentSpread.length) {
+        const [top, ...bottom] = currentSpread;
+        container.innerHTML = `<div style="display:flex; flex-direction:column; align-items:center; gap:2rem;">
+          <div style="text-align:center;">${renderCard(top, 0)}<div style="margin-top:8px; color:#e1c394; font-size:0.8rem;">Your elemental magic</div></div>
+          <div style="display:flex; justify-content:center; gap:2rem; flex-wrap:wrap;">
+            <div style="text-align:center;">${renderCard(bottom[0], 1)}<div style="margin-top:8px; color:#e1c394; font-size:0.8rem;">Your greatest strength</div></div>
+            <div style="text-align:center;">${renderCard(bottom[1], 2)}<div style="margin-top:8px; color:#e1c394; font-size:0.8rem;">Your hidden weakness</div></div>
+            <div style="text-align:center;">${renderCard(bottom[2], 3)}<div style="margin-top:8px; color:#e1c394; font-size:0.8rem;">Lesson to learn on The Road</div></div>
+          </div>
+        </div>`;
+      } else {
+        container.innerHTML = `<div style="display:flex; flex-direction:column; align-items:center; gap:2rem;">
+          <div style="text-align:center;"><div class="reading-card-placeholder" style="width:140px; height:220px; background:#2a201c80; border-radius:20px; border:2px dashed #73563f; display:flex; align-items:center; justify-content:center; color:#b87c4f;">✨</div><div style="margin-top:8px; color:#e1c394; font-size:0.8rem;">Your elemental magic</div></div>
+          <div style="display:flex; justify-content:center; gap:2rem; flex-wrap:wrap;">
+            <div style="text-align:center;"><div class="reading-card-placeholder" style="width:140px; height:220px; background:#2a201c80; border-radius:20px; border:2px dashed #73563f;"></div><div style="margin-top:8px; color:#e1c394; font-size:0.8rem;">Your greatest strength</div></div>
+            <div style="text-align:center;"><div class="reading-card-placeholder" style="width:140px; height:220px; background:#2a201c80; border-radius:20px; border:2px dashed #73563f;"></div><div style="margin-top:8px; color:#e1c394; font-size:0.8rem;">Your hidden weakness</div></div>
+            <div style="text-align:center;"><div class="reading-card-placeholder" style="width:140px; height:220px; background:#2a201c80; border-radius:20px; border:2px dashed #73563f;"></div><div style="margin-top:8px; color:#e1c394; font-size:0.8rem;">Lesson to learn on The Road</div></div>
+          </div>
+        </div>`;
+      }
+    }
+    else if (currentTemplate === "safe") {
+      const captions = ["The Traveler", "What's Missing", "Path Behind", "Path Ahead", "Obstacles", "Windfall", "Destination"];
+      if (currentSpread.length) {
+        container.innerHTML = `<div class="cards-spread" style="display:flex; flex-wrap:wrap; justify-content:center; gap:1.5rem;">${currentSpread.map((c, i) => 
+          `<div style="text-align:center;">${renderCard(c, i)}<div class="card-caption" style="text-align:center; margin-top:8px; color:#e1c394; font-size:0.8rem; font-weight:bold;">${captions[i]}</div></div>`
+        ).join('')}</div>`;
+      } else {
+        container.innerHTML = `<div class="cards-spread" style="display:flex; flex-wrap:wrap; justify-content:center; gap:1.5rem;">${captions.map(caption => 
+          `<div style="text-align:center;"><div class="reading-card-placeholder" style="width:140px; height:220px; background:#2a201c80; border-radius:20px; border:2px dashed #73563f; display:flex; align-items:center; justify-content:center; color:#b87c4f;">✨</div><div class="card-caption" style="text-align:center; margin-top:8px; color:#e1c394; font-size:0.8rem; font-weight:bold;">${caption}</div></div>`
+        ).join('')}</div>`;
+      }
+    }
+    
+    // Attach zoom listeners after rendering
+    attachZoomListeners();
+  }
+  
+  function drawNonRepeating(count) {
+    if (count > FULL_DECK.length) count = FULL_DECK.length;
+    const shuffled = [...FULL_DECK];
+    for (let i = shuffled.length - 1; i > 0; i--) {
+      const j = Math.floor(Math.random() * (i + 1));
+      [shuffled[i], shuffled[j]] = [shuffled[j], shuffled[i]];
+    }
+    return shuffled.slice(0, count);
+  }
+  
+  function generateReading() {
+    let count = 1;
+    if (currentTemplate === "three") count = 3;
+    else if (currentTemplate === "whichwitch") count = 4;
+    else if (currentTemplate === "safe") count = 7;
+    currentSpread = drawNonRepeating(count);
+    cardImageModes = {}; // Reset all to thumb mode
+    renderSpread();
+  }
+  
+  // --- TAB SWITCHING & REUSING ORIGINAL GUIDEBOOK STRUCTURE ---
+  function rebuildOriginalUI() {
+    const originalSidebar = document.querySelector("#tab-guide .sidebar");
+    const originalViewer = document.querySelector("#tab-guide .viewer");
+    originalSidebar.innerHTML = `<div class="section-title">📖 Text Guides</div><div style="margin-bottom:0.5rem;font-size:1.2rem;font-weight:bold;color:#e7bf8e;">✨ Introduction</div><div class="text-buttons" id="intro-buttons"></div><div style="margin-bottom:0.5rem;margin-top:1.5rem;font-size:1.2rem;font-weight:bold;color:#e7bf8e;">🔮 Tarot Readings</div><div class="text-buttons" id="reading-buttons"></div><div class="section-title" style="margin-top:1.8rem;">🃏 Major Arcana</div><div class="cards-grid" id="major-grid-container"></div><div class="section-title" style="margin-top:0.5rem;">✨ Minor Arcana</div><div id="minor-arcana-accordion"></div><div class="footer-note">⚡ click any card/guide — all Major cards & Guides display two images.</div>`;
+    originalViewer.innerHTML = `<div class="viewer-header">🌙 Sacred Pages 🌙</div><div id="viewerContent" class="dual-image-container"><div class="fallback-message">✨ select a guide or tarot card<br>to reveal the corresponding pages</div></div>`;
+    
+    // Simplified guidebook rebuild (keeping original functionality)
+    const introItems = [{ display:"Welcome to the Coven", mainImg:"welcome_coven.jpg", secondImg:"welcome_coven_detail.jpg", dual:true },{ display:"Tarot Basics", mainImg:"tarot_basics.jpg", secondImg:null, dual:false },{ display:"Understanding Court Cards", mainImg:"court_cards.jpg", secondImg:null, dual:false },{ display:"Reading Reversals... or Not", mainImg:"reading_reversals.jpg", secondImg:null, dual:false }];
+    const readingItems = [{ display:"Opening and Closing a Reading", mainImg:"opening_closing_reading.jpg", secondImg:"opening_closing_part2.jpg", dual:true },{ display:"What to Ask", mainImg:"what_to_ask.jpg", secondImg:null, dual:false },{ display:"Getting Started with Tarot Spreads", mainImg:"tarot_spreads_start.jpg", secondImg:null, dual:false },{ display:"Which-Witch Tarot Spread", mainImg:"which_witch_spread.jpg", secondImg:"which_witch_spread_page2.jpg", dual:true },{ display:"Lilia's Safe-Passage Tarot Spread", mainImg:"lilia_safe_passage.jpg", secondImg:null, dual:false }];
+    const majorArcanaCards = [{ name:"📘 Major Arcana Guide", thumb:"major_guide_thumb.jpg", image1:"major_guide_thumb.jpg", image2:"major_guide_desc.jpg" },{ name:"📙 Minor Arcana Guide", thumb:"minor_guide_thumb.jpg", image1:"minor_guide_thumb.jpg", image2:"minor_guide_desc.jpg" },{ name:"0 · The Fool", thumb:"thumb_fool.jpg", image1:"thumb_fool.jpg", image2:"desc_fool.jpg" },{ name:"I · The Magician", thumb:"thumb_magician.jpg", image1:"thumb_magician.jpg", image2:"desc_magician.jpg" },{ name:"II · The High Priestess", thumb:"thumb_high_priestess.jpg", image1:"thumb_high_priestess.jpg", image2:"desc_high_priestess.jpg" },{ name:"III · The Empress", thumb:"thumb_empress.jpg", image1:"thumb_empress.jpg", image2:"desc_empress.jpg" },{ name:"IV · The Emperor", thumb:"thumb_emperor.jpg", image1:"thumb_emperor.jpg", image2:"desc_emperor.jpg" },{ name:"V · The Hierophant", thumb:"thumb_hierophant.jpg", image1:"thumb_hierophant.jpg", image2:"desc_hierophant.jpg" },{ name:"VI · The Lovers", thumb:"thumb_lovers.jpg", image1:"thumb_lovers.jpg", image2:"desc_lovers.jpg" },{ name:"VII · The Chariot", thumb:"thumb_chariot.jpg", image1:"thumb_chariot.jpg", image2:"desc_chariot.jpg" },{ name:"VIII · Strength", thumb:"thumb_strength.jpg", image1:"thumb_strength.jpg", image2:"desc_strength.jpg" },{ name:"IX · The Hermit", thumb:"thumb_hermit.jpg", image1:"thumb_hermit.jpg", image2:"desc_hermit.jpg" },{ name:"X · Wheel of Fortune", thumb:"thumb_wheel_fortune.jpg", image1:"thumb_wheel_fortune.jpg", image2:"desc_wheel_fortune.jpg" },{ name:"XI · Justice", thumb:"thumb_justice.jpg", image1:"thumb_justice.jpg", image2:"desc_justice.jpg" },{ name:"XII · The Hanged Man", thumb:"thumb_hanged_man.jpg", image1:"thumb_hanged_man.jpg", image2:"desc_hanged_man.jpg" },{ name:"XIII · Death", thumb:"thumb_death.jpg", image1:"thumb_death.jpg", image2:"desc_death.jpg" },{ name:"XIV · Temperance", thumb:"thumb_temperance.jpg", image1:"thumb_temperance.jpg", image2:"desc_temperance.jpg" },{ name:"XV · The Devil", thumb:"thumb_devil.jpg", image1:"thumb_devil.jpg", image2:"desc_devil.jpg" },{ name:"XVI · The Tower", thumb:"thumb_tower.jpg", image1:"thumb_tower.jpg", image2:"desc_tower.jpg" },{ name:"XVII · The Star", thumb:"thumb_star.jpg", image1:"thumb_star.jpg", image2:"desc_star.jpg" },{ name:"XVIII · The Moon", thumb:"thumb_moon.jpg", image1:"thumb_moon.jpg", image2:"desc_moon.jpg" },{ name:"XIX · The Sun", thumb:"thumb_sun.jpg", image1:"thumb_sun.jpg", image2:"desc_sun.jpg" },{ name:"XX · Judgement", thumb:"thumb_judgement.jpg", image1:"thumb_judgement.jpg", image2:"desc_judgement.jpg" },{ name:"XXI · The World", thumb:"thumb_world.jpg", image1:"thumb_world.jpg", image2:"desc_world.jpg" }];
+    function generateSuitCards(suit){ const ranks=["Ace","Two","Three","Four","Five","Six","Seven","Eight","Nine","Ten","Page","Knight","Queen","King"]; return ranks.map(rank=>({ name:`${rank} of ${suit}`, descImg:`desc_${rank.toLowerCase()}_${suit.toLowerCase()}.jpg` })); }
+    const minorSuitsData = [{ suit:"Wands", icon:"🔥", cards:generateSuitCards("Wands") },{ suit:"Cups", icon:"💧", cards:generateSuitCards("Cups") },{ suit:"Swords", icon:"⚔️", cards:generateSuitCards("Swords") },{ suit:"Pentacles", icon:"🪙", cards:generateSuitCards("Pentacles") }];
+    function displayTwoImages(a,b,c,d){ document.getElementById("viewerContent").innerHTML=`<div class="dual-image-container"><div class="image-card"><img src="${IMG_BASE}${a}"><div class="image-caption">${c}</div></div><div class="image-card"><img src="${IMG_BASE}${b}"><div class="image-caption">${d}</div></div></div>`; }
+    function displaySingle(a,b){ document.getElementById("viewerContent").innerHTML=`<div class="dual-image-container"><div class="image-card"><img src="${IMG_BASE}${a}"><div class="image-caption">${b}</div></div></div>`; }
+    function clearAllActive(){ document.querySelectorAll('.text-guide-btn, .card-btn, .minor-card-btn').forEach(btn=>btn.classList.remove('active','active-card','active-minor')); }
+    function buildTextButtons(){ const ic=document.getElementById("intro-buttons"), rc=document.getElementById("reading-buttons"); ic.innerHTML=""; rc.innerHTML=""; introItems.forEach(i=>{ const b=document.createElement("button"); b.className="text-guide-btn"; b.textContent=i.display; b.onclick=()=>{ clearAllActive(); b.classList.add("active"); if(i.dual&&i.secondImg) displayTwoImages(i.mainImg,i.secondImg,i.display+" p1",i.display+" p2"); else displaySingle(i.mainImg,i.display); }; ic.appendChild(b); }); readingItems.forEach(i=>{ const b=document.createElement("button"); b.className="text-guide-btn"; b.textContent=i.display; b.onclick=()=>{ clearAllActive(); b.classList.add("active"); if(i.dual&&i.secondImg) displayTwoImages(i.mainImg,i.secondImg,i.display+" p1",i.display+" p2"); else displaySingle(i.mainImg,i.display); }; rc.appendChild(b); }); }
+    function buildMajorGrid(){ const g=document.getElementById("major-grid-container"); g.innerHTML=""; majorArcanaCards.forEach(c=>{ const d=document.createElement("div"); d.className="card-btn"; const i=document.createElement("img"); i.className="card-thumb"; i.src=IMG_BASE+c.thumb; i.onerror=()=>i.src="data:image/svg+xml,..."; const s=document.createElement("span"); s.className="card-label"; s.textContent=c.name.length>18?c.name.slice(0,16)+"..":c.name; d.append(i,s); d.onclick=()=>{ clearAllActive(); d.classList.add("active-card"); displayTwoImages(c.image1,c.image2,`${c.name} Thumb`,`${c.name} Desc`); }; g.appendChild(d); }); }
+    function buildMinorArcanaAccordion(){ const a=document.getElementById("minor-arcana-accordion"); a.innerHTML=""; minorSuitsData.forEach(s=>{ const sd=document.createElement("div"); sd.className="minor-suit"; const h=document.createElement("div"); h.className="suit-header"; h.innerHTML=`<span>${s.icon} ${s.suit} (${s.cards.length})</span><span class="toggle-icon">▼</span>`; const cd=document.createElement("div"); cd.className="suit-cards"; s.cards.forEach(c=>{ const b=document.createElement("div"); b.className="minor-card-btn"; b.innerHTML=`<div class="minor-card-name">${c.name}</div>`; b.onclick=(e)=>{ e.stopPropagation(); clearAllActive(); b.classList.add("active-minor"); displaySingle(c.descImg,`${c.name} Guide`); }; cd.appendChild(b); }); h.onclick=()=>{ cd.classList.toggle("open"); h.querySelector(".toggle-icon").textContent=cd.classList.contains("open")?"▲":"▼"; }; sd.append(h,cd); a.appendChild(sd); }); }
+    buildTextButtons(); buildMajorGrid(); buildMinorArcanaAccordion();
+    document.getElementById("viewerContent").innerHTML = `<div class="fallback-message">🔮 Click any guide, Major card, or Minor card to reveal pages.</div>`;
+  }
+  
+  // --- Tab Switching Logic ---
+  document.querySelectorAll('.tab-btn').forEach(btn => {
+    btn.addEventListener('click', () => {
+      document.querySelectorAll('.tab-btn').forEach(b => b.classList.remove('active'));
+      btn.classList.add('active');
+      const tabId = btn.getAttribute('data-tab');
+      document.querySelectorAll('.tab-content').forEach(tab => tab.classList.remove('active'));
+      document.getElementById(`tab-${tabId}`).classList.add('active');
+      if (tabId === 'reading') renderSpread();
+    });
   });
   
-  console.log("Tarot guide ready with preloading enabled.");
+  document.querySelectorAll('.template-btn').forEach(btn => {
+    btn.addEventListener('click', () => {
+      document.querySelectorAll('.template-btn').forEach(b => b.classList.remove('active-template'));
+      btn.classList.add('active-template');
+      currentTemplate = btn.getAttribute('data-template');
+      currentSpread = [];
+      cardImageModes = {};
+      renderSpread();
+    });
+  });
+  
+  document.getElementById('drawReadingBtn').addEventListener('click', () => generateReading());
+  
+  rebuildOriginalUI();
+  currentTemplate = "one";
+  renderSpread();
 </script>
 </body>
 </html>
